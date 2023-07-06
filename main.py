@@ -79,10 +79,10 @@ class TimeReportBot:
             print("Clear the field")
             # //*[@id="hours"]/div[1]/div[1]/div/div/div
             # XPATH //*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/input')
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').clear()
             sleep(1)
             print("Send 8 hours to the field")
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/input').send_keys("8")
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').send_keys("8")
             sleep(1)
             # click on the save button
             print("Save")
