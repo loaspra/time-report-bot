@@ -77,17 +77,20 @@ class TimeReportBot:
             self.wait_spinning()
             # send 8 hours to the hours field
             print("Clear the field")
-            # //*[@id="input-hours-1e521868-1bbd-11ee-b1bd-6ff94163b65b"]
-            # /html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input')
+            # //*[@id="hours"]/div[1]/div[1]/div/div/div
+            # XPATH //*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/input')
             sleep(1)
             print("Send 8 hours to the field")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input').send_keys("8")
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/input').send_keys("8")
             sleep(1)
             # click on the save button
-            # XPATH //*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]
             print("Save")
-            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]").click()
+            # save the element and then click on its parent
+            # self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]")
+            element = self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]")
+            parent = element.find_element_by_xpath('..')
+            parent.click()
             wait = True
 
             self.wait_spinning()
