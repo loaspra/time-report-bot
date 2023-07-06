@@ -75,9 +75,11 @@ class TimeReportBot:
             self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'42585')]").click()
             
             self.wait_spinning()
-            # send 8 hours to the hours field   
+            # send 8 hours to the hours field
+            print("Clear the field")
             self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').clear()
             sleep(1)
+            print("Send 8 hours to the field")
             self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').send_keys("8")
             sleep(1)
             # click on the save button
