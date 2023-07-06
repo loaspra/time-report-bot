@@ -85,11 +85,12 @@ class TimeReportBot:
             sleep(1)
             # click on the save button
             print("Save")
-            # save the element and then click on its parent
-            # self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]")
-            element = self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]")
-            parent = element.find_element_by_xpath('..')
-            parent.click()
+
+            # save the full XPATH of the "//*[contains(text(),'Guardar')]" element
+            # then get the parent element and click on it
+            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]").find_element_by_xpath('..').click()
+
+
             wait = True
 
             self.wait_spinning()
