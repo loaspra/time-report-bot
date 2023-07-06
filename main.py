@@ -77,9 +77,9 @@ class TimeReportBot:
             self.wait_spinning()
             # send 8 hours to the hours field
             print("Clear the field")
-            # //*[@id="hours"]/div[1]/div[1]/div/div/div
-            # XPATH //*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').clear()
+            # Code that gives error: self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').clear() Message: element not interactable
+            # Solution
+            self.driver.execute_script("document.querySelector('#hours > div.v-input__slot > div.v-input__append-inner > div > div > div > input').value = ''")
             sleep(1)
             print("Send 8 hours to the field")
             self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').send_keys("8")
