@@ -8,6 +8,8 @@ from selenium.webdriver.chrome.service import Service
 
 from webdriver_manager.chrome import ChromeDriverManager
 
+import dotenv as env
+
 
 from time import sleep
 
@@ -46,21 +48,26 @@ class TimeReportBot:
         # Create a new instance of the Chrome driver
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="111.0.5563.64").install()), options=self.options)
         self.driver.get(URL)
-        sleep(1)
-        # click on the PLUS icon
-        
-        # try catch "NoSuchElementException" from selenium.common.exceptions
-        # wait for the page to load
+
+    def hang_for_load(self):
         wait = True
         while wait:
             try:
-                self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Hoy')]")
+                self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Today')]")
                 print("Home page loaded!")
                 wait = False
             except:
                 print("Waiting for the home page to load")
                 sleep(2)
                 wait = True
+
+        return 
+
+    def do(self):
+        # click on the PLUS icon
+        # try catch "NoSuchElementException" from selenium.common.exceptions
+        # wait for the page to load
+        self.hang_for_load()
 
         try:
             try: 
@@ -72,7 +79,7 @@ class TimeReportBot:
         except:
             print("Element not found")
             print("Trying to click on the SDA TOOL plus icon")
-            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'42585')]").click()
+            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'44916')]").click()
             
             self.wait_spinning()
             # send 8 hours to the hours field
@@ -95,44 +102,6 @@ class TimeReportBot:
             self.driver.save_screenshot(f"{target_path}\\{target_name}")
             sleep(1)
             print("Screenshot saved on: " + f"{target_path}\\{target_name}")
-            exit(0)
-
-        # click on Projects with code
-        wait = True
-        self.wait_spinning()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[3]/div/div[1]/div').click()
-        # click on the SDA TOOL software project
-        self.wait_spinning()
-        print("Click on the SDA TOOL software project")
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[4]/div/div/div[1]').click()
-        self.wait_spinning()
-        # omit features
-        print("Click on the omit features")
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[2]/span').click()
-        self.wait_spinning()
-        # click on development
-        print("Click on development")
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[2]/div/div[4]/div').click()
-        # click on LRBA
-        self.wait_spinning()
-        print("Click on LRBA")
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[2]/div/div[13]/div/div[1]/div[2]').click()
-        self.wait_spinning()
-        # write 8 hours in the hours field
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').clear()
-        sleep(1)
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-id"]').send_keys("8")
-        # CLick on the Save button
-        self.wait_spinning()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[4]/button').click()
-        self.wait_spinning()
-        # Scroll down
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        sleep(1)
-        self.driver.save_screenshot(f"{target_path}\\{target_name}")
-        self.wait_spinning()
-        sleep(1)
-        print("Screenshot saved on: " + f"{target_path}\\{target_name}")
 
 
 if __name__ == "__main__":
