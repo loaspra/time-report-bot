@@ -34,6 +34,7 @@ class TimeReportBot:
     def __init__(self, URL, target_name):
         # Create a new instance of Options with personal profile
         self.options = Options()
+        self.options.add_argument(r"--user-data-dir=C:\Users\Server Gata\AppData\Local\Chromium\User Data")
         self.options.add_argument(r"--profile-directory=Default")
         self.options.add_argument(r"--disable-dev-shm-usage")
         self.options.add_argument("start-maximized"); # https://stackoverflow.com/a/26283818/1689770
@@ -45,8 +46,9 @@ class TimeReportBot:
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
 
         # Create a new instance of the Chrome driver
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.options)
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="111.0.5563.64").install()), options=self.options)
         self.driver.get(URL)
+        sleep(1)
 
     def hang_for_load(self):
         wait = True
