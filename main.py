@@ -75,7 +75,7 @@ class TimeReportBot:
         
         self.wait_for_full_load()
         # click on //*[@id="msa***a@neoris.com"]
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="msa***a@neoris.com"]').click()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[1]/div[2]/div[2]/div[2]').click()
 
         # Then click on the button with type="submit"
         self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[3]/button').click()
