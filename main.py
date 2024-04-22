@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import re
 
 from selenium import webdriver
 
@@ -132,16 +133,15 @@ class TimeReportBot:
         child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
         print(child.get_attribute("aria-label"))
         str_raw = child.get_attribute("aria-label")
-        es_idx = str_raw.find("es")
-        str_raw = str_raw[es_idx:]
-        # Remove all non numeric chars from str_raw
-        str_raw = ''.join(filter(str.isdigit, str_raw))
-        print(str_raw)
 
-        # close the tab
-        self.driver.close()
+        # Use REGEX to get the string with the code (6 digits)
+        code = re.search(r"\d{6}", str_raw).group(0)
+        print(code)
 
-        return str_raw
+        # change the focus to the first tab
+        self.driver.switch_to.window(self.driver.window_handles[0])
+
+        return code
 
 
     def do(self):
