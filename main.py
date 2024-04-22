@@ -55,9 +55,11 @@ class TimeReportBot:
         self.target_name = target_name
 
     def wait_for_full_load(self):
+        # Wait for the page to load
         wait = WebDriverWait(self.driver, 10)
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         sleep(1)
+        pass
 
 
     def register_hours(self):
@@ -92,7 +94,7 @@ class TimeReportBot:
         # Click on the button with type="submit"
         self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[2]/button').click()
         self.wait_for_full_load()
-        sleep(2)
+        sleep(15) # wait a little longer
         self.wait_for_full_load()
 
         try:
