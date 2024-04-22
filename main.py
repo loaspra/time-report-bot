@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 
 from selenium import webdriver
 
@@ -13,7 +14,6 @@ import dotenv as env
 
 from time import sleep
 
-import sys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -55,46 +55,111 @@ class TimeReportBot:
 
     def wait_for_full_load(self):
         wait = WebDriverWait(self.driver, 10)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bg-spinner")))
+        wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+
+
+    def register_hours(self):
+        pass
+
+    def login_with_2FA(self):
+        # First log in at BBVA sigin form
+        self.driver.find_element(by = By.ID, value = "username").send_keys(os.getenv("BBVA_USER"))
+        self.driver.find_element(by = By.ID, value = "password").send_keys(os.getenv("BBVA_PASS"))
+
+        # Submit the form
+        # self.driver.find_element(by = By.ID, value = '').click()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]/div[2]/button[1]').click()
+        
+        self.wait_for_full_load()
+        # click on //*[@id="msa***a@neoris.com"]
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="msa***a@neoris.com"]').click()
+
+        # Then click on the button with type="submit"
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[3]/button').click()
+
+        # Wait for the page to load
+        self.wait_for_full_load()
+        
+        sleep(5)
+        FA_code = self.get_2FA_code()
+
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="otp_mail"]').send_keys(FA_code)
+
+        # Click on the button with type="submit"
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[2]/button').click()
+        self.wait_for_full_load()
+        sleep(2)
+
+        # /html/body/div/main/section/div[2]/section/nav/ul/li[2]
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
+
+        # //*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]').send_keys("8")
+
+        # Click on the Guardar button
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
+        sleep(2)
+
+        return 
+
+    def get_2FA_code(self):
+
+        # Open new tab and navigate to URL_EMAIL_2FA
+        self.driver.execute_script("window.open('');")
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        self.driver.get(os.getenv("URL_MAIL_2FA")) # this is the outlook mail
+
+        # If there is a login screen, send the credentials (env.2FA_MAIL, env.2FA_PASS) and log in into outlook 
+        try:
+            self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "Iniciar sesión")]')
+            self.driver.find_element(by=By.ID, value='i0116').send_keys(os.getenv("MAIL_2FA_USERNAME"))
+            self.driver.find_element(by=By.ID, value='idSIButton9').click()
+            sleep(2)
+            self.driver.find_element(by=By.ID, value='i0118').send_keys(os.getenv("MAIL_2FA_PASSWORD"))
+            self.driver.find_element(by=By.ID, value='idSIButton9').click()
+        except:
+            pass
+    
+        self.wait_for_full_load()
+
+        # We are into the outlook inbox now
+        # 
+        # Get the "aria-label" property of the first child of the element that has the XPATH = //*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div
+        child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
+        print(child.get_attribute("aria-label"))
+        str_raw = child.get_attribute("aria-label")
+        es_idx = str_raw.find("es")
+        str_raw = str_raw[es_idx:]
+        # Remove all non numeric chars from str_raw
+        str_raw = ''.join(filter(str.isdigit, str_raw))
+        print(str_raw)
+
+        # close the tab
+        self.driver.close()
+
+        return str_raw
+
 
     def do(self):
-
         # Open the URL
-        self.wait_for_full_load();
+        self.driver.get(os.getenv("URL_TIME_REPORT"))
 
+        # Wait for the page to load
+        self.wait_for_full_load()
+        sleep(2)
+
+        # if the signin  form is present, call login_with_2FA, otherwise call register_hours
         try:
-            try: 
-                print("Click on the plus icon")
-                self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div[2]/div[1]/div').click()
-            except:
-                print("Click on the plus icon (2)")         
-                self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[3]/section/nav/ul/li[2]/div[2]/div[1]/div').click()
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]')
+            self.login_with_2FA()
         except:
-            print("Element not found")
-            print("Trying to click on the SDA TOOL plus icon")
-            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'44916')]").click()
-            
-            self.wait_spinning()
-            # send 8 hours to the hours field
-            print("Clear the field")
-            # 
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input').clear() 
-            sleep(1)
-            print("Send 8 hours to the field")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input').send_keys("8")
-            sleep(1)
-            # click on the save button
-            print("Save")
-            # self.driver.find_element(by = By.XPATH, value = "/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[2]/button[2]").click()
-            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]").click()
+            pass
 
-            wait = True
+        self.register_hours()
 
-            self.wait_spinning()
-
-            self.driver.save_screenshot(f"{target_path}\\{target_name}")
-            sleep(1)
-            print("Screenshot saved on: " + f"{target_path}\\{target_name}")
+        self.driver.save_screenshot(f"{target_path}\\{target_name}")
+        sleep(1)
+        print("Screenshot saved on: " + f"{target_path}\\{target_name}")
 
 
 if __name__ == "__main__":
@@ -121,7 +186,7 @@ if __name__ == "__main__":
     try:
         bot = TimeReportBot(target_path, target_name)
         bot.do()
-        
+
     except Exception as e:
         print(e)
         print("Closing the script")
