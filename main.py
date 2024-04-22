@@ -72,6 +72,10 @@ class TimeReportBot:
             # /div/div[1]/div/div --hours--/div[1]/div[1]/div/div/div/input
         # Click on the Guardar button
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
+        self.wait_for_full_load()
+        sleep(5)
+        self.wait_for_full_load()
+        self.wait_spinning()
         sleep(2)
         return
 
