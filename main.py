@@ -14,6 +14,8 @@ import dotenv as env
 from time import sleep
 
 import sys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 class TimeReportBot:
 
@@ -31,7 +33,7 @@ class TimeReportBot:
             sleep(2)
         return 
 
-    def __init__(self, URL, target_name):
+    def __init__(self, target_path, target_name):
         # Create a new instance of Options with personal profile
         self.options = Options()
         self.options.add_argument(r"--user-data-dir=C:\Users\Server Gata\AppData\Local\Chromium\User Data")
@@ -47,28 +49,18 @@ class TimeReportBot:
 
         # Create a new instance of the Chrome driver
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="111.0.5563.64").install()), options=self.options)
-        self.driver.get(URL)
-        sleep(1)
 
-    def hang_for_load(self):
-        wait = True
-        while wait:
-            try:
-                self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Today')]")
-                print("Home page loaded!")
-                wait = False
-            except:
-                print("Waiting for the home page to load")
-                sleep(2)
-                wait = True
+        self.target_path = target_path
+        self.target_name = target_name
 
-        return 
+    def wait_for_full_load(self):
+        wait = WebDriverWait(self.driver, 10)
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bg-spinner")))
 
     def do(self):
-        # click on the PLUS icon
-        # try catch "NoSuchElementException" from selenium.common.exceptions
-        # wait for the page to load
-        self.hang_for_load()
+
+        # Open the URL
+        self.wait_for_full_load();
 
         try:
             try: 
@@ -122,10 +114,14 @@ if __name__ == "__main__":
     current_date = now.strftime("%Y%m%d")
     target_name = current_date + " MADARIAGA COLLADO SANTIAGO HECTOR.png"
     target_path = r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\pics"
-    URL = "https://timereport-eng.com/"
+    
+    # Load dotenv file
+    env.load_dotenv()
 
     try:
-        bot = TimeReportBot(URL, target_name)
+        bot = TimeReportBot(target_path, target_name)
+        bot.do()
+        
     except Exception as e:
         print(e)
         print("Closing the script")
