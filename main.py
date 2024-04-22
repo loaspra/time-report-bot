@@ -63,6 +63,8 @@ class TimeReportBot:
 
 
     def register_hours(self):
+        print("Registering hours")
+        self.wait_spinning()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]').send_keys("8")
         # Click on the Guardar button
