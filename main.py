@@ -63,7 +63,12 @@ class TimeReportBot:
 
 
     def register_hours(self):
-        pass
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]').send_keys("8")
+        # Click on the Guardar button
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
+        sleep(2)
+        return
 
     def login_with_2FA(self):
         # First log in at BBVA sigin form
@@ -109,13 +114,6 @@ class TimeReportBot:
                 file.write(str(cookies))
             self.driver.quit()
             exit(-2)
-
-        # //*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]').send_keys("8")
-
-        # Click on the Guardar button
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
-        sleep(2)
 
         return 
 
