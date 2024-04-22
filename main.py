@@ -120,7 +120,8 @@ class TimeReportBot:
             sleep(2)
             self.driver.find_element(by=By.ID, value='i0118').send_keys(os.getenv("MAIL_2FA_PASSWORD"))
             self.driver.find_element(by=By.ID, value='idSIButton9').click()
-        except:
+        except Exception as e:
+            print(e)
             pass
     
         self.wait_for_full_load()
@@ -155,8 +156,8 @@ class TimeReportBot:
         try:
             self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]')
             self.login_with_2FA()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         self.register_hours()
 
