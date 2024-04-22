@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import re
+import sys
 
 from selenium import webdriver
 
@@ -193,7 +194,7 @@ if __name__ == "__main__":
     now = datetime.now()
     
     # redirect the output to a file (Logs)
-    # sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
+    sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
     
     # get the day of week
     day_of_week = now.strftime("%A")
@@ -217,5 +218,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
         print("Closing the script")
-        # sys.stdout.close()
+        sys.stdout.close()
         exit(1)
