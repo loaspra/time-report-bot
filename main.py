@@ -93,9 +93,20 @@ class TimeReportBot:
         self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[2]/button').click()
         self.wait_for_full_load()
         sleep(2)
+        self.wait_for_full_load()
 
-        # /html/body/div/main/section/div[2]/section/nav/ul/li[2]
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
+        try:
+            # /html/body/div/main/section/div[2]/section/nav/ul/li[2]
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
+        except:
+            print("No element found, but we will save cookies")
+            # save the session cookies to avoid the 2FA login next time
+            cookies = self.driver.get_cookies()
+            # write the cookies to a file
+            with open("cookies.txt", "w") as file:
+                file.write(str(cookies))
+            self.driver.quit()
+            exit(-2)
 
         # //*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]
         self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]').send_keys("8")
@@ -136,7 +147,7 @@ class TimeReportBot:
 
         # Use REGEX to get the string with the code (6 digits)
         code = re.search(r"\d{6}", str_raw).group(0)
-        print(code)
+        print(f"2FA code: {code}")
 
         # change the focus to the first tab
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -151,6 +162,14 @@ class TimeReportBot:
         # Wait for the page to load
         self.wait_for_full_load()
         sleep(2)
+
+        # If the page is an error (no interactable elements) instead of the time report page, reload the page
+        try:
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]')
+        except:
+            self.driver.get(os.getenv("URL_TIME_REPORT"))
+            self.wait_for_full_load()
+            sleep(2)
 
         # if the signin  form is present, call login_with_2FA, otherwise call register_hours
         try:
