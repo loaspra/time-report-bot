@@ -66,7 +66,9 @@ class TimeReportBot:
         print("Registering hours")
         self.wait_spinning()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-f1ec2dbe-0067-11ef-8f49-bda173575d3b"]').send_keys("8")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="time-form"]/div/div[1]/div/div/div/div/input').send_keys("8")
+        # /html/body/div/main/section/div[2]/section/nav/ul/li[2]/div/div[3] task collapse
+            # /div/div[1]/div/div --hours--/div[1]/div[1]/div/div/div/input
         # Click on the Guardar button
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
         sleep(2)
