@@ -56,6 +56,7 @@ class TimeReportBot:
     def wait_for_full_load(self):
         wait = WebDriverWait(self.driver, 10)
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        sleep(1)
 
 
     def register_hours(self):
@@ -65,6 +66,8 @@ class TimeReportBot:
         # First log in at BBVA sigin form
         self.driver.find_element(by = By.ID, value = "username").send_keys(os.getenv("BBVA_USER"))
         self.driver.find_element(by = By.ID, value = "password").send_keys(os.getenv("BBVA_PASS"))
+
+        sleep(1)
 
         # Submit the form
         # self.driver.find_element(by = By.ID, value = '').click()
