@@ -1,7 +1,4 @@
 from datetime import datetime
-import os
-import re
-import sys
 
 from selenium import webdriver
 
@@ -9,15 +6,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
-from webdriver_manager.chrome import ChromeDriverManager
-
-import dotenv as env
-
 
 from time import sleep
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+import sys
 
 class TimeReportBot:
 
@@ -35,14 +27,14 @@ class TimeReportBot:
             sleep(2)
         return 
 
-    def __init__(self, target_path, target_name):
+    def __init__(self, URL, target_name):
         # Create a new instance of Options with personal profile
         self.options = Options()
         self.options.add_argument(r"--user-data-dir=C:\Users\Server Gata\AppData\Local\Chromium\User Data")
         self.options.add_argument(r"--profile-directory=Default")
         self.options.add_argument(r"--disable-dev-shm-usage")
         self.options.add_argument("start-maximized"); # https://stackoverflow.com/a/26283818/1689770
-        self.options.add_argument("enable-automation"); # https://stackoverflow.com/a/43840128/1689770
+        # self.options.add_argument("enable-automation"); # https://stackoverflow.com/a/43840128/1689770
         self.options.add_argument("--no-sandbox"); # https://stackoverflow.com/a/50725918/1689770
         self.options.add_argument("--disable-dev-shm-usage"); # https://stackoverflow.com/a/50725918/1689770
         self.options.add_argument("--disable-browser-side-navigation"); # https://stackoverflow.com/a/49123152/1689770
@@ -50,157 +42,93 @@ class TimeReportBot:
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
 
         # Create a new instance of the Chrome driver
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=self.options)
-
-        self.target_path = target_path
-        self.target_name = target_name
-
-    def wait_for_full_load(self):
-        # Wait for the page to load
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        self.driver = webdriver.Chrome(options=self.options)
+        self.driver.get(URL)
         sleep(1)
-        pass
+        # click on the PLUS icon
+        
+        # try catch "NoSuchElementException" from selenium.common.exceptions
+        # wait for the page to load
+        wait = True
+        while wait:
+            try:
+                self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Hoy')]")
+                print("Home page loaded!")
+                wait = False
+            except:
+                print("Waiting for the home page to load")
+                sleep(2)
+                wait = True
 
+        try:
+            try: 
+                print("Click on the plus icon")
+                self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div[2]/div[1]/div').click()
+            except:
+                print("Click on the plus icon (2)")         
+                self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[3]/section/nav/ul/li[2]/div[2]/div[1]/div').click()
+        except:
+            print("Element not found")
+            print("Trying to click on the SDA TOOL plus icon")
+            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'42585')]").click()
+            
+            self.wait_spinning()
+            # send 8 hours to the hours field
+            print("Clear the field")
+            # 
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input').clear() 
+            sleep(1)
+            print("Send 8 hours to the field")
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input').send_keys("8")
+            sleep(1)
+            # click on the save button
+            print("Save")
+            # self.driver.find_element(by = By.XPATH, value = "/html/body/div/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[2]/button[2]").click()
+            self.driver.find_element(by = By.XPATH, value = "//*[contains(text(),'Guardar')]").click()
 
-    def register_hours(self):
-        print("Registering hours")
+            wait = True
+
+            self.wait_spinning()
+
+            self.driver.save_screenshot(f"{target_path}\\{target_name}")
+            sleep(1)
+            print("Screenshot saved on: " + f"{target_path}\\{target_name}")
+            exit(0)
+
+        # click on Projects with code
+        wait = True
         self.wait_spinning()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="time-form"]/div/div[1]/div/div/div/div/input').send_keys("8")
-        # /html/body/div/main/section/div[2]/section/nav/ul/li[2]/div/div[3] task collapse
-            # /div/div[1]/div/div --hours--/div[1]/div[1]/div/div/div/input
-        # Click on the Guardar button
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
-        self.wait_for_full_load()
-        sleep(5)
-        self.wait_for_full_load()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[3]/div/div[1]/div').click()
+        # click on the SDA TOOL software project
         self.wait_spinning()
-        sleep(2)
-        return
-
-    def login_with_2FA(self):
-        # First log in at BBVA sigin form
-        self.driver.find_element(by = By.ID, value = "username").send_keys(os.getenv("BBVA_USER"))
-        self.driver.find_element(by = By.ID, value = "password").send_keys(os.getenv("BBVA_PASS"))
-
+        print("Click on the SDA TOOL software project")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[4]/div/div/div[1]').click()
+        self.wait_spinning()
+        # omit features
+        print("Click on the omit features")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[2]/span').click()
+        self.wait_spinning()
+        # click on development
+        print("Click on development")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[2]/div/div[4]/div').click()
+        # click on LRBA
+        self.wait_spinning()
+        print("Click on LRBA")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[2]/div/div[13]/div/div[1]/div[2]').click()
+        self.wait_spinning()
+        # write 8 hours in the hours field
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="hours"]/div[1]/div[1]/div/div/div/*').clear()
         sleep(1)
-
-        # Submit the form
-        # self.driver.find_element(by = By.ID, value = '').click()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]/div[2]/button[1]').click()
-        
-        self.wait_for_full_load()
-        # click on //*[@id="msa***a@neoris.com"]
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[1]/div[2]/div[2]/div[2]').click()
-
-        # Then click on the button with type="submit"
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[3]/button').click()
-
-        # Wait for the page to load
-        self.wait_for_full_load()
-        
-        sleep(5)
-        FA_code = self.get_2FA_code()
-
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="otp_mail"]').send_keys(FA_code)
-
-        # Click on the button with type="submit"
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[2]/button').click()
-        self.wait_for_full_load()
-        sleep(15) # wait a little longer
-        self.wait_for_full_load()
-
-        try:
-            # /html/body/div/main/section/div[2]/section/nav/ul/li[2]
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
-        except:
-            print("No element found, but we will save cookies")
-            # save the session cookies to avoid the 2FA login next time
-            cookies = self.driver.get_cookies()
-            # write the cookies to a file
-            with open("cookies.txt", "w") as file:
-                file.write(str(cookies))
-            self.driver.quit()
-            exit(-2)
-
-        return 
-
-    def get_2FA_code(self):
-
-        # Open new tab and navigate to URL_EMAIL_2FA
-        self.driver.execute_script("window.open('');")
-        self.driver.switch_to.window(self.driver.window_handles[1])
-        self.driver.get(os.getenv("URL_MAIL_2FA")) # this is the outlook mail
-
-        # If there is a login screen, send the credentials (env.2FA_MAIL, env.2FA_PASS) and log in into outlook 
-        try:
-            self.driver.find_element(by=By.XPATH, value='//*[contains(text(), "Iniciar sesión")]')
-            self.driver.find_element(by=By.ID, value='i0116').send_keys(os.getenv("MAIL_2FA_USERNAME"))
-            self.driver.find_element(by=By.ID, value='idSIButton9').click()
-            sleep(2)
-            self.driver.find_element(by=By.ID, value='i0118').send_keys(os.getenv("MAIL_2FA_PASSWORD"))
-            self.driver.find_element(by=By.ID, value='idSIButton9').click()
-        except Exception as e:
-            print(e)
-            pass
-    
-        self.wait_for_full_load()
-
-        # We are into the outlook inbox now
-        # 
-        # Get the "aria-label" property of the first child of the element that has the XPATH = //*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div
-        child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
-        print(child.get_attribute("aria-label"))
-        str_raw = child.get_attribute("aria-label")
-
-        # Use REGEX to get the string with the code (6 digits)
-        code = re.search(r"\d{6}", str_raw).group(0)
-        print(f"2FA code: {code}")
-
-        # change the focus to the first tab
-        self.driver.switch_to.window(self.driver.window_handles[0])
-
-        return code
-
-
-    def do(self):
-        # Open the URL
-        self.driver.get(os.getenv("URL_TIME_REPORT"))
-
-        # Wait for the page to load
-        self.wait_for_full_load()
-        sleep(2)
-
-        # FIx: check if the google sign in page is present (choose your account)
-        try:
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div')
-            print("Google sign in page found")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div').click()
-            sleep(2)
-        except:
-            print("No google sign in page found")
-            pass
-
-        # If the page is an error (no interactable elements) instead of the time report page, reload the page
-        try:
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]')
-        except:
-            self.driver.get(os.getenv("URL_TIME_REPORT"))
-            self.wait_for_full_load()
-            sleep(2)
-
-        # if the signin  form is present, call login_with_2FA, otherwise call register_hours
-        try:
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]')
-            self.login_with_2FA()
-        except Exception as e:
-            print(e)
-
-        self.register_hours()
-
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="input-hours-id"]').send_keys("8")
+        # CLick on the Save button
+        self.wait_spinning()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/div/section[4]/button').click()
+        self.wait_spinning()
+        # Scroll down
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        sleep(1)
         self.driver.save_screenshot(f"{target_path}\\{target_name}")
+        self.wait_spinning()
         sleep(1)
         print("Screenshot saved on: " + f"{target_path}\\{target_name}")
 
@@ -222,14 +150,10 @@ if __name__ == "__main__":
     current_date = now.strftime("%Y%m%d")
     target_name = current_date + " MADARIAGA COLLADO SANTIAGO HECTOR.png"
     target_path = r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\pics"
-    
-    # Load dotenv file
-    env.load_dotenv()
+    URL = "https://timereport-eng.com/"
 
     try:
-        bot = TimeReportBot(target_path, target_name)
-        bot.do()
-
+        bot = TimeReportBot(URL, target_name)
     except Exception as e:
         print(e)
         print("Closing the script")
