@@ -6,8 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
-from webdriver_manager.chrome import ChromeDriverManager
-
 
 from time import sleep
 
@@ -44,7 +42,7 @@ class TimeReportBot:
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
 
         # Create a new instance of the Chrome driver
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="111.0.5563.64").install()), options=self.options)
+        self.driver = webdriver.Chrome(options=self.options)
         self.driver.get(URL)
         sleep(1)
         # click on the PLUS icon
