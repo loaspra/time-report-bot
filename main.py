@@ -50,8 +50,7 @@ class TimeReportBot:
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
 
         # Create a new instance of the Chrome driver
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=self.options)
+        self.driver = webdriver.Chrome(options=self.options)
 
         self.target_path = target_path
         self.target_name = target_name
