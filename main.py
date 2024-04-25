@@ -145,6 +145,7 @@ class TimeReportBot:
             pass
     
         self.wait_for_full_load()
+        sleep(2.7)
 
         # We are into the outlook inbox now
         # 
