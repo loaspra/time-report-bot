@@ -50,7 +50,7 @@ class TimeReportBot:
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
 
         # Create a new instance of the Chrome driver
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="112.0.5615.49").install()), options=self.options)
+        self.driver = webdriver.Chrome("C:/Intel/chromedriver_win32.zip", options=self.options)
 
         self.target_path = target_path
         self.target_name = target_name
@@ -171,6 +171,16 @@ class TimeReportBot:
         # Wait for the page to load
         self.wait_for_full_load()
         sleep(2)
+
+        # FIx: check if the google sign in page is present (choose your account)
+        try:
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div')
+            print("Google sign in page found")
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div').click()
+            sleep(2)
+        except:
+            print("No google sign in page found")
+            pass
 
         # If the page is an error (no interactable elements) instead of the time report page, reload the page
         try:
