@@ -150,6 +150,7 @@ class TimeReportBot:
         # We are into the outlook inbox now
         # 
         # Get the "aria-label" property of the first child of the element that has the XPATH = //*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div
+        self.wait_for_mail()
         child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
         print(child.get_attribute("aria-label"))
         str_raw = child.get_attribute("aria-label")
@@ -162,6 +163,19 @@ class TimeReportBot:
         self.driver.switch_to.window(self.driver.window_handles[0])
 
         return code
+    
+    def wait_for_mail(self):
+        wait = True
+        while wait:
+            try:
+                self.driver.find_element(by = By.XPATH, value = '//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
+                print("Waiting for the mail")
+                wait = False
+            except:
+                print("No mail found")
+                sleep(2)
+                pass
+        return
 
 
     def do(self):
