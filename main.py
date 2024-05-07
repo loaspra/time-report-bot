@@ -44,6 +44,7 @@ class TimeReportBot:
         self.options.add_argument("--disable-dev-shm-usage"); # https://stackoverflow.com/a/50725918/1689770
         self.options.add_argument("--disable-browser-side-navigation"); # https://stackoverflow.com/a/49123152/1689770
         self.options.add_argument("--disable-gpu"); # https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc
+        self.options.add_argument("--enable-features=SameSiteByDefaultCookies@Disabled")
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
 
         # Create a new instance of the Chrome driver
@@ -64,8 +65,14 @@ class TimeReportBot:
         print("Registering hours")
         self.wait_spinning()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
-        self.driver.find_element(by = By.XPATH, value = '//*[contains(@id, "input-hours")]').clear().send_keys("7")
-        self.driver.find_element(by = By.XPATH, value = '//*[contains(@id, "input-minutes")]').clear().send_keys("10")
+        input_hours = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-hours")]')
+        print(input_hours)
+        input_hours.clear()
+        input_hours.send_keys("7")
+
+        input_minutes = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-minutes")]')
+        input_minutes.clear()
+        input_minutes.send_keys("10")
 
         # Click on the Guardar button
         self.driver.find_element(by = By.XPATH, value = '//*[contains(@class, "accept")]').click()
@@ -168,7 +175,10 @@ class TimeReportBot:
     
     def wait_for_mail(self):
         wait = True
+        count = 0
         while wait:
+            if count > 10:
+                self.driver.refresh()
             try:
                 self.driver.find_element(by = By.XPATH, value = '//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
                 print("Waiting for the mail")
@@ -176,6 +186,7 @@ class TimeReportBot:
             except:
                 print("No mail found")
                 sleep(2)
+                count += 1
                 pass
         return
 
@@ -246,6 +257,9 @@ if __name__ == "__main__":
         bot.do()
 
     except Exception as e:
+        bot.driver.take_screenshot(f"{target_path}\\{target_name}") # for debugging
+        bot.driver.quit()
+        print("An error ocurred")
         print(e)
         print("Closing the script")
         sys.stdout.close()
