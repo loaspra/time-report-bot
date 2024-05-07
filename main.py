@@ -64,12 +64,11 @@ class TimeReportBot:
         print("Registering hours")
         self.wait_spinning()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="time-form"]/div/div[1]/div/div/div/div/input').clear()
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="time-form"]/div/div[1]/div/div/div/div/input').send_keys("8")
-        # /html/body/div/main/section/div[2]/section/nav/ul/li[2]/div/div[3] task collapse
-            # /div/div[1]/div/div --hours--/div[1]/div[1]/div/div/div/input
+        self.driver.find_element(by = By.XPATH, value = '//*[contains(@id, "input-hours")]').clear().send_keys("7")
+        self.driver.find_element(by = By.XPATH, value = '//*[contains(@id, "input-minutes")]').clear().send_keys("10")
+
         # Click on the Guardar button
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]/div/div[3]/div/div[2]/button[2]').click()
+        self.driver.find_element(by = By.XPATH, value = '//*[contains(@class, "accept")]').click()
         self.wait_for_full_load()
         sleep(5)
         self.wait_for_full_load()
@@ -108,8 +107,10 @@ class TimeReportBot:
         # Click on the button with type="submit"
         self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[2]/button').click()
         self.wait_for_full_load()
+        self.wait_spinning()
         sleep(15) # wait a little longer
         self.wait_for_full_load()
+        self.wait_spinning()
 
         try:
             # /html/body/div/main/section/div[2]/section/nav/ul/li[2]
