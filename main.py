@@ -182,6 +182,7 @@ class TimeReportBot:
             print(count)
             if count > 10:
                 count = 0
+                print("Refreshing the page")
                 self.driver.refresh()
             try:
                 self.driver.find_element(by = By.XPATH, value = '//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
