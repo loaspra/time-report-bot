@@ -180,6 +180,7 @@ class TimeReportBot:
         wait = True
         count = 0
         while wait:
+            print(count)
             if count > 10:
                 count = 0
                 self.driver.refresh()
