@@ -34,6 +34,8 @@ class TimeReportBot:
 
     def __init__(self, target_path, target_name):
         # Create a new instance of Options with personal profile
+        print("Init")
+        
         self.options = Options()
         self.options.add_argument(r"--user-data-dir=C:\Users\Server Gata\AppData\Local\Chromium\User Data")
         self.options.add_argument(r"--profile-directory=Default")
@@ -46,10 +48,10 @@ class TimeReportBot:
         self.options.add_argument("--disable-gpu"); # https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc
         self.options.add_argument("--enable-features=SameSiteByDefaultCookies@Disabled")
         self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
-
+        print("Inicializando driver")
         # Create a new instance of the Chrome driver
         self.driver = webdriver.Chrome(options=self.options)
-
+        print("Driver initalized")
         self.target_path = target_path
         self.target_name = target_name
 
@@ -235,7 +237,7 @@ if __name__ == "__main__":
     now = datetime.now()
     
     # redirect the output to a file (Logs)
-    sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
+    # sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
     
     # get the day of week
     day_of_week = now.strftime("%A")
@@ -257,7 +259,7 @@ if __name__ == "__main__":
         bot.do()
 
     except Exception as e:
-        bot.driver.take_screenshot(f"{target_path}\\{target_name}") # for debugging
+        bot.driver.save_screenshot(f"{target_path}\\{target_name}") # for debugging
         bot.driver.quit()
         print("An error ocurred")
         print(e)
