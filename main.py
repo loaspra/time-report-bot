@@ -259,7 +259,7 @@ if __name__ == "__main__":
         bot.do()
 
     except Exception as e:
-        bot.driver.take_screenshot(f"{target_path}\\{target_name}") # for debugging
+        bot.driver.save_screenshot(f"{target_path}\\{target_name}") # for debugging
         bot.driver.quit()
         print("An error ocurred")
         print(e)
