@@ -57,11 +57,12 @@ class TimeReportBot:
 
     def wait_for_full_load(self):
         # Wait for the page to load
+        print("Waiting for the page to load")
         wait = WebDriverWait(self.driver, 10)
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         sleep(1)
-        pass
-
+        print("Page loaded")
+        return
 
     def register_hours(self):
         print("Registering hours")
@@ -153,7 +154,7 @@ class TimeReportBot:
             self.driver.find_element(by=By.ID, value='i0118').send_keys(os.getenv("MAIL_2FA_PASSWORD"))
             self.driver.find_element(by=By.ID, value='idSIButton9').click()
         except Exception as e:
-            print(e)
+            print("No outlook login screen found")
             pass
     
         self.wait_for_full_load()
@@ -164,9 +165,7 @@ class TimeReportBot:
         # Get the "aria-label" property of the first child of the element that has the XPATH = //*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div
         self.wait_for_mail()
         child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
-        print(child.get_attribute("aria-label"))
         str_raw = child.get_attribute("aria-label")
-
         # Use REGEX to get the string with the code (6 digits)
         code = re.search(r"\d{6}", str_raw).group(0)
         print(f"2FA code: {code}")
