@@ -86,6 +86,7 @@ class TimeReportBot:
         return
 
     def login_with_2FA(self):
+        print("Logging in with 2FA")
         sleep(1.2)
         # First log in at BBVA sigin form
         self.driver.find_element(by = By.ID, value = "username").send_keys(os.getenv("BBVA_USER"))
@@ -137,7 +138,7 @@ class TimeReportBot:
         return 
 
     def get_2FA_code(self):
-
+        print("Getting 2FA code")
         # Open new tab and navigate to URL_EMAIL_2FA
         self.driver.execute_script("window.open('');")
         self.driver.switch_to.window(self.driver.window_handles[1])
