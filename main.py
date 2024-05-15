@@ -240,7 +240,7 @@ if __name__ == "__main__":
     now = datetime.now()
     
     # redirect the output to a file (Logs)
-    # sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
+    sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
     
     # get the day of week
     day_of_week = now.strftime("%A")
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         bot.do()
 
     except Exception as e:
-        bot.driver.save_screenshot(f"{target_path}\\{target_name}") # for debugging
+        bot.driver.save_screenshot(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{target_name}") # for debugging
         bot.driver.quit()
         print("An error ocurred")
         print(e)
