@@ -268,7 +268,7 @@ if __name__ == "__main__":
     now = datetime.now()
     
     # redirect the output to a file (Logs)
-    # sys.stdout = open(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs/{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
+    sys.stdout = open(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs/{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
     
     # get the day of week
     day_of_week = now.strftime("%A")
