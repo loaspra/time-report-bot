@@ -35,22 +35,15 @@ class TimeReportBot:
     def __init__(self, target_path, target_name):
         # Create a new instance of Options with personal profile
         print("Init")
-        
-        self.options = Options()
-        self.options.add_argument(r"--user-data-dir=C:\Users\Server Gata\AppData\Local\Chromium\User Data")
-        self.options.add_argument(r"--profile-directory=Default")
-        self.options.add_argument(r"--disable-dev-shm-usage")
-        self.options.add_argument("start-maximized"); # https://stackoverflow.com/a/26283818/1689770
-        self.options.add_argument("enable-automation"); # https://stackoverflow.com/a/43840128/1689770
-        self.options.add_argument("--no-sandbox"); # https://stackoverflow.com/a/50725918/1689770
-        self.options.add_argument("--disable-dev-shm-usage"); # https://stackoverflow.com/a/50725918/1689770
-        self.options.add_argument("--disable-browser-side-navigation"); # https://stackoverflow.com/a/49123152/1689770
-        self.options.add_argument("--disable-gpu"); # https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc
-        self.options.add_argument("--enable-features=SameSiteByDefaultCookies@Disabled")
-        self.options.add_experimental_option('extensionLoadTimeout', 60_000 * 5)
-        print("Inicializando driver")
+        # Fix: connect to existing versions of chrome 
+        debugger_address = 'localhost:1258'
         # Create a new instance of the Chrome driver
-        self.driver = webdriver.Chrome(options=self.options)
+        # Set up ChromeOptions and connect to the existing browser
+        c_options = Options()
+        c_options.add_experimental_option("debuggerAddress", debugger_address)
+
+
+        self.driver = webdriver.Chrome(options=c_options)
         print("Driver initalized")
         self.target_path = target_path
         self.target_name = target_name
@@ -67,19 +60,54 @@ class TimeReportBot:
     def register_hours(self):
         print("Registering hours")
         self.wait_spinning()
+        # Step 1: proyecto 1
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
         input_hours = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-hours")]')
         print(input_hours)
         input_hours.clear()
-        input_hours.send_keys("7")
+        input_hours.send_keys("6")
 
         input_minutes = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-minutes")]')
+        input_minutes.clear()
+        input_minutes.send_keys("50")
+
+        # Click on the Guardar butt
+        print("Saving proyect 1 hours")
+        self.driver.find_element(by = By.XPATH, value = '//*[contains(@class, "accept")]').click()
+        sleep(1)
+        self.wait_spinning()
+        # Step 2: proyecto 2
+        print("Step 2")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]').click()
+        input_hours = self.driver.find_element(by=By.XPATH, value='//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input')
+        print(input_hours)
+        input_hours.clear()
+        input_hours.send_keys("1")
+
+        input_minutes = self.driver.find_element(by=By.XPATH, value='//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[2]/div[1]/div/input')
         input_minutes.clear()
         input_minutes.send_keys("10")
 
         # Click on the Guardar button
-        self.driver.find_element(by = By.XPATH, value = '//*[contains(@class, "accept")]').click()
-        self.wait_for_full_load()
+        print("Saving proyect 2s hours")
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[2]/button[2]').click()
+        sleep(1)
+        self.wait_spinning()
+
+        # Check if there is a modal
+        try:
+            # if the following button existsÑ '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[4]/div/div/div[6]/span/button[1]'
+            # Click on it, if not, just continue with your execution
+            self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[4]/div/div/div[6]/span/button[1]').click()
+            print("Modal of confirmation displayed")
+            self.sleep(1)
+            self.wait_spinning()
+
+        except e:
+            print(e, "No modal of confirmation displayed")
+            pass
+
+
         sleep(5)
         self.wait_for_full_load()
         self.wait_spinning()
@@ -99,6 +127,7 @@ class TimeReportBot:
         # Submit the form
         # self.driver.find_element(by = By.ID, value = '').click()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="loginForm"]/div[2]/button[1]').click()
+        sleep(2.1)
         
         self.wait_for_full_load()
         # click on //*[@id="msa***a@neoris.com"]
@@ -141,8 +170,7 @@ class TimeReportBot:
     def get_2FA_code(self):
         print("Getting 2FA code")
         # Open new tab and navigate to URL_EMAIL_2FA
-        self.driver.execute_script("window.open('');")
-        self.driver.switch_to.window(self.driver.window_handles[1])
+        self.driver.switch_to.new_window('tab')
         self.driver.get(os.getenv("URL_MAIL_2FA")) # this is the outlook mail
 
         # If there is a login screen, send the credentials (env.2FA_MAIL, env.2FA_PASS) and log in into outlook 
@@ -231,16 +259,16 @@ class TimeReportBot:
 
         self.register_hours()
 
-        self.driver.save_screenshot(f"{target_path}\\{target_name}")
+        self.driver.save_screenshot(f"{target_path}/{target_name}")
         sleep(1)
-        print("Screenshot saved on: " + f"{target_path}\\{target_name}")
+        print("Screenshot saved on: " + f"{target_path}/{target_name}")
 
 
 if __name__ == "__main__":
     now = datetime.now()
     
     # redirect the output to a file (Logs)
-    sys.stdout = open(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
+    # sys.stdout = open(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs/{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
     
     # get the day of week
     day_of_week = now.strftime("%A")
@@ -252,7 +280,7 @@ if __name__ == "__main__":
     
     current_date = now.strftime("%Y%m%d")
     target_name = current_date + " MADARIAGA COLLADO SANTIAGO HECTOR.png"
-    target_path = r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\pics"
+    target_path = f"{os.getenv('ONEDRIVE_AUX_PATH')}/pics"
     
     # Load dotenv file
     env.load_dotenv()
@@ -262,10 +290,11 @@ if __name__ == "__main__":
         bot.do()
 
     except Exception as e:
-        bot.driver.save_screenshot(r"C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\logs" + f"\\{target_name}") # for debugging
+        bot.driver.save_screenshot(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs" + f"\\{target_name}") # for debugging
         bot.driver.quit()
         print("An error ocurred")
         print(e)
+        sleep(1600)
         print("Closing the script")
         sys.stdout.close()
-        exit(1)
+        # wait for any key press
