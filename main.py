@@ -60,6 +60,18 @@ class TimeReportBot:
     def register_hours(self):
         print("Registering hours")
         self.wait_spinning()
+        
+        # Step 0: Delete any element (div) that has the class "main-view_alert"
+        try:
+            alert_div = self.driver.find_element(by=By.CLASS_NAME, value="main-view__alert")
+            got_it_button = alert_div.find_element(by=By.CSS_SELECTOR, value="[data-cy='close-noti']")
+            got_it_button.click()
+            print("Alert deleted")
+            sleep(1)
+        except:
+            print("No alert found")
+            pass
+
         # Step 1: proyecto 1
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
         input_hours = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-hours")]')
@@ -100,15 +112,15 @@ class TimeReportBot:
             # Click on it, if not, just continue with your execution
             self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[4]/div/div/div[6]/span/button[1]').click()
             print("Modal of confirmation displayed")
-            self.sleep(1)
+            self.wait_spinning()
+            sleep(1)
             self.wait_spinning()
 
-        except e:
+        except Exception as e:
             print(e, "No modal of confirmation displayed")
             pass
 
 
-        sleep(5)
         self.wait_for_full_load()
         self.wait_spinning()
         sleep(2)
@@ -153,8 +165,8 @@ class TimeReportBot:
         self.wait_spinning()
 
         try:
-            # /html/body/div/main/section/div[2]/section/nav/ul/li[2]
-            self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
+            # If there is a text that contains 'Today', continue, if not, exception is thrown
+            self.driver.find_element(by = By.XPATH, value = '//*[contains(text(), "Today")]')
         except:
             print("No element found, but we will save cookies")
             # save the session cookies to avoid the 2FA login next time
@@ -268,7 +280,7 @@ if __name__ == "__main__":
     now = datetime.now()
     
     # redirect the output to a file (Logs)
-    sys.stdout = open(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs/{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
+    # sys.stdout = open(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs/{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
     
     # get the day of week
     day_of_week = now.strftime("%A")
@@ -294,7 +306,7 @@ if __name__ == "__main__":
         bot.driver.quit()
         print("An error ocurred")
         print(e)
-        sleep(1600)
+        sleep(5)
         print("Closing the script")
-        sys.stdout.close()
+        exit(1)
         # wait for any key press

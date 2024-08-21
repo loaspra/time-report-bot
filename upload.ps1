@@ -10,7 +10,7 @@ if ($today -eq "Saturday" -or $today -eq "Sunday") {
 
 
 # Get the last file created in the directory
-$lastFile = Get-ChildItem -Path "C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\pics" -Filter "*.png" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
+$lastFile = Get-ChildItem -Path "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics" -Filter "*.png" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
 
 # Check if the file name contains the current date (YYYYMMdd)
 $fileName = $lastFile.Name
@@ -18,7 +18,7 @@ $today = (Get-Date).ToString("yyyyMMdd")
 if ($fileName -notlike "*$today*") {
     Write-Output "The file name doesn't contain the current date"
     # re run python script "main.py"
-    python "C:\Users\Server Gata\Documents\Python-Scripts\main.py"
+    python "C:\Users\santiago.madariaga\Documents\Python-Scripts\main.py"
     
     # wait 5 minutes for the file to be created
     Start-Sleep -s 300
@@ -26,8 +26,8 @@ if ($fileName -notlike "*$today*") {
 
 # Check again if the file name contains the current date (YYYYMMdd)
 # Get the last file created in the directory
-$lastFile = Get-ChildItem -Path "C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\pics" -Filter "*.png" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
-$fileName = "C:\Users\Server Gata\OneDrive - NEORIS\General - Test File Sync\pics\" + $lastFile.Name
+$lastFile = Get-ChildItem -Path "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics" -Filter "*.png" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
+$fileName = "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics\" + $lastFile.Name
 
 
 Write-Host "File to copy: " + $lastFile
@@ -39,6 +39,6 @@ if ($fileName -notlike "*$today*") {
 }
 
 # Copy the file to the destination directory
-Copy-Item -Path $fileName -Destination "C:\Users\Server Gata\OneDrive - NEORIS\[NO BORRAR] Evidencias Activity Report - DATIO"
+Copy-Item -Path $fileName -Destination "C:\Users\santiago.madariaga\OneDrive - NEORIS\[NO BORRAR] Evidencias Activity Report - DATIO"
 
 # End of script
