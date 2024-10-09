@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import re
 import sys
@@ -8,8 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
-import dotenv as env
-
+from dotenv import load_dotenv
 
 from time import sleep
 
@@ -72,40 +71,31 @@ class TimeReportBot:
             print("No alert found")
             pass
 
+        # IF there is an image that has a classname "weekend-img mt-5", we skip the registration 
+        try:
+            self.driver.find_element(by=By.CLASS_NAME, value="weekend-img mt-5")
+            print("Weekend image found, skipping registration")
+            return
+        except:
+            print("No weekend image found")
+            
         # Step 1: proyecto 1
         self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[2]').click()
         input_hours = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-hours")]')
         print(input_hours)
         input_hours.clear()
-        input_hours.send_keys("6")
+        input_hours.send_keys("8")
 
         input_minutes = self.driver.find_element(by=By.XPATH, value='//*[contains(@id, "input-minutes")]')
         input_minutes.clear()
-        input_minutes.send_keys("50")
+        input_minutes.send_keys("00")
 
-        # Click on the Guardar butt
+        # Click on the Guardar button
         print("Saving proyect 1 hours")
         self.driver.find_element(by = By.XPATH, value = '//*[contains(@class, "accept")]').click()
         sleep(1)
         self.wait_spinning()
-        # Step 2: proyecto 2
-        print("Step 2")
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]').click()
-        input_hours = self.driver.find_element(by=By.XPATH, value='//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[1]/div[1]/div/div/div/input')
-        print(input_hours)
-        input_hours.clear()
-        input_hours.send_keys("1")
-
-        input_minutes = self.driver.find_element(by=By.XPATH, value='//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[1]/div/div/div[2]/div[1]/div/input')
-        input_minutes.clear()
-        input_minutes.send_keys("10")
-
-        # Click on the Guardar button
-        print("Saving proyect 2s hours")
-        self.driver.find_element(by = By.XPATH, value = '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[3]/div/div[2]/button[2]').click()
-        sleep(1)
-        self.wait_spinning()
-
+        
         # Check if there is a modal
         try:
             # if the following button existsÑ '//*[@id="app"]/main/section/div[2]/section/nav/ul/li[3]/div/div[4]/div/div/div[6]/span/button[1]'
@@ -130,11 +120,15 @@ class TimeReportBot:
         print("Logging in with 2FA")
         sleep(1.2)
         # First log in at BBVA sigin form
+        self.driver.find_element(by = By.ID, value = "username").click()
+        self.driver.find_element(by = By.ID, value = "username").clear()
         self.driver.find_element(by = By.ID, value = "username").send_keys(os.getenv("BBVA_USER"))
         sleep(1.3)
+        self.driver.find_element(by = By.ID, value = "password").click()
+        self.driver.find_element(by = By.ID, value = "password").clear()
         self.driver.find_element(by = By.ID, value = "password").send_keys(os.getenv("BBVA_PASS"))
-
-        sleep(1.1)
+        print(f"User: {os.getenv('BBVA_USER')}, Pass: {os.getenv('BBVA_PASS')}")
+        sleep(1.2)
 
         # Submit the form
         # self.driver.find_element(by = By.ID, value = '').click()
@@ -154,13 +148,15 @@ class TimeReportBot:
         sleep(5)
         FA_code = self.get_2FA_code()
 
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="otp_mail"]').click()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="otp_mail"]').clear()
         self.driver.find_element(by = By.XPATH, value = '//*[@id="otp_mail"]').send_keys(FA_code)
 
         # Click on the button with type="submit"
         self.driver.find_element(by = By.XPATH, value = '//*[@id="form"]/div/div[2]/button').click()
         self.wait_for_full_load()
         self.wait_spinning()
-        sleep(15) # wait a little longer
+        sleep(8) # wait a little longer
         self.wait_for_full_load()
         self.wait_spinning()
 
@@ -202,12 +198,24 @@ class TimeReportBot:
 
         # We are into the outlook inbox now
         # 
-        # Get the "aria-label" property of the first child of the element that has the XPATH = //*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div
-        self.wait_for_mail()
-        child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
-        str_raw = child.get_attribute("aria-label")
-        # Use REGEX to get the string with the code (6 digits)
-        code = re.search(r"\d{6}", str_raw).group(0)
+        # try to Get the "aria-label" property of the first child of the element that has the XPATH = //*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div
+        try: 
+            self.wait_for_mail()
+            child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
+            str_raw = child.get_attribute("aria-label")
+            # Use REGEX to get the string with the code (6 digits)
+            code = re.search(r"\d{6}", str_raw).group(0)
+        except Exception as e:
+            # If there is no mail, click on the "Otros" mail folder (a <span> that contains the text Otros)
+            print("No mail found on Prioritarios folder, trying on Otros folder")
+            self.driver.find_element(by=By.XPATH, value='//*[@id="Pivot107-Tab1"]').click()
+            self.wait_for_mail()
+            sleep(2) 
+            child = self.driver.find_element(by=By.XPATH, value='//*[@id="MailList"]/div/div/div/div/div/div/div/div[2]/div/div')
+            str_raw = child.get_attribute("aria-label")
+            # Use REGEX to get the string with the code (6 digits)
+            code = re.search(r"\d{6}", str_raw).group(0)
+
         print(f"2FA code: {code}")
 
         # change the focus to the first tab
@@ -234,6 +242,37 @@ class TimeReportBot:
                 count += 1
                 pass
         return
+    
+    def register_previous_days(self):
+        # New feature: Navigate to prior days in order to check if the hours were already registered
+        # the days can be changed by clicking to the respective  //*[contains(@class, "YYYY-MM-dd")] elemt
+        # First, get the current date
+        current_date = datetime.now() # .strftime("%Y-%m-%d")
+
+        while True:
+            previos_date = current_date - timedelta(days=1)
+            # try to click on the previous day
+            try:
+                self.driver.find_element(by = By.XPATH, value = f'//*[contains(@class, "{previos_date}")]').click()
+                print("Previous day found")
+                self.wait_for_full_load()
+                sleep(2)
+                # Check if the hours were already registered (there is a span with a text 8:00 instead of 0:00)
+                try:
+                    self.driver.find_element(by = By.XPATH, value = '//*[contains(text(), "8:00")]')
+                    # Exit the function
+                    break 
+                except:
+                    print("Hours not registered")
+                    self.register_hours()
+                    self.wait_for_full_load()
+                    sleep(2)
+            except:
+                print("ERR: No previous day found")
+                break
+
+        print(f"REgistered dates from {previos_date} to {current_date}")
+        return
 
 
     def do(self):
@@ -245,14 +284,25 @@ class TimeReportBot:
         sleep(2)
 
         # FIx: check if the google sign in page is present (choose your account)
-        try:
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div')
-            print("Google sign in page found")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div').click()
-            sleep(2)
-        except:
-            print("No google sign in page found")
-            pass
+        cnt = 0
+        while True:
+            if cnt > 5:
+                print("No google sign in page found")
+                break
+            try:
+                # if there is the text "Choose an account" in the page, click on the account that is needed
+                self.driver.find_element(by = By.XPATH, value = '//*[contains(text(), "Choose an account")]')
+                print("Google sign in page found")
+                # Click on the div with the following props: <div class="yAlK0b" jsname="bQIQze" data-email="santiago.madariaga.contractor@bbva.com" translate="no">santiago.madariaga.contractor@bbva.com</div>
+                # Click on the div that have the data-email attribute with the value "santiago.madariaga.contractor@bbva.com"
+                self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/div/div/div[2]/div/div/div[1]/form/span/section/div/div/div/div/ul/li[1]/div/div[1]/div/div[2]/div').click()
+                self.wait_for_full_load()
+            except:
+                print("No google sign in page found")
+                break
+
+            sleep(1)
+            cnt += 1                
 
         # If the page is an error (no interactable elements) instead of the time report page, reload the page
         try:
@@ -270,7 +320,11 @@ class TimeReportBot:
             print(e)
 
         self.register_hours()
+        sleep(1)
+        self.register_previous_days()
 
+        # Scroll to the top of the page before taking the screenshot
+        self.driver.execute_script("window.scrollTo(0, 0);")
         self.driver.save_screenshot(f"{target_path}/{target_name}")
         sleep(1)
         print("Screenshot saved on: " + f"{target_path}/{target_name}")
@@ -278,6 +332,11 @@ class TimeReportBot:
 
 if __name__ == "__main__":
     now = datetime.now()
+
+    # load .env file
+    load_dotenv()
+
+    # Print env variables
     
     # redirect the output to a file (Logs)
     # sys.stdout = open(f"{os.getenv('ONEDRIVE_AUX_PATH')}/logs/{str(now).replace(' ', '¬').replace(':', '').replace('.','')}.txt", 'w')
@@ -293,9 +352,6 @@ if __name__ == "__main__":
     current_date = now.strftime("%Y%m%d")
     target_name = current_date + " MADARIAGA COLLADO SANTIAGO HECTOR.png"
     target_path = f"{os.getenv('ONEDRIVE_AUX_PATH')}/pics"
-    
-    # Load dotenv file
-    env.load_dotenv()
 
     try:
         bot = TimeReportBot(target_path, target_name)
@@ -308,5 +364,5 @@ if __name__ == "__main__":
         print(e)
         sleep(5)
         print("Closing the script")
-        exit(1)
+        exit(-1)
         # wait for any key press

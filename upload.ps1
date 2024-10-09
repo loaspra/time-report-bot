@@ -8,37 +8,36 @@ if ($today -eq "Saturday" -or $today -eq "Sunday") {
     exit
 }
 
+# Define source and destination directories
+$sourceDir = "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics"
+$destDir = "C:\Users\santiago.madariaga\OneDrive - NEORIS\[NO BORRAR] Evidencias Activity Report - DATIO"
+$backlogDir = "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics\backlog"
 
 # Get the last file created in the directory
-$lastFile = Get-ChildItem -Path "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics" -Filter "*.png" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
+$files = Get-ChildItem -Path $sourceDir -Filter "*.png"
 
-# Check if the file name contains the current date (YYYYMMdd)
-$fileName = $lastFile.Name
-$today = (Get-Date).ToString("yyyyMMdd")
-if ($fileName -notlike "*$today*") {
-    Write-Output "The file name doesn't contain the current date"
-    # re run python script "main.py"
-    python "C:\Users\santiago.madariaga\Documents\Python-Scripts\main.py"
-    
-    # wait 5 minutes for the file to be created
-    Start-Sleep -s 300
-}
-
-# Check again if the file name contains the current date (YYYYMMdd)
-# Get the last file created in the directory
-$lastFile = Get-ChildItem -Path "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics" -Filter "*.png" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
-$fileName = "C:\Users\santiago.madariaga\OneDrive - NEORIS\General - Test File Sync\pics\" + $lastFile.Name
-
-
-Write-Host "File to copy: " + $lastFile
-Write-Host $lastFile
-
-if ($fileName -notlike "*$today*") {
-    Write-Output "The file name doesn't contain the current date (2nd attempt)"
+# Check if there are any files to process
+if ($files.Count -eq 0) {
+    Write-Output "No files found in the source directory"
     exit
 }
 
-# Copy the file to the destination directory
-Copy-Item -Path $fileName -Destination "C:\Users\santiago.madariaga\OneDrive - NEORIS\[NO BORRAR] Evidencias Activity Report - DATIO"
+# Copy each file to the destination directory and then move it to the backlog directory
+foreach ($file in $files) {
+    $filePath = $file.FullName
+    $fileName = $file.Name
+    $destFilePath = Join-Path -Path $destDir -ChildPath $fileName
+    $backlogFilePath = Join-Path -Path $backlogDir -ChildPath $fileName
 
-# End of script
+    # Copy the file to the destination directory
+    Copy-Item -Path $filePath -Destination $destFilePath
+
+    Write-Output $backlogFilePath
+
+    # Move the file to the backlog directory
+    Move-Item -Path $filePath -Destination $backlogFilePath
+
+    Write-Output "Processed file: $fileName"
+}
+
+Write-Output "All files have been processed"
